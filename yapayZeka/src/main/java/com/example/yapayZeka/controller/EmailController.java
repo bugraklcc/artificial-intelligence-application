@@ -1,8 +1,7 @@
 package com.example.yapayZeka.controller;
 
-
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import weka.classifiers.bayes.NaiveBayes;
@@ -21,13 +20,13 @@ public class EmailController {
     public EmailController() {
         try {
             // Model1 yükleme
-            model1 = (NaiveBayes) SerializationHelper.read(".\\Downloads\\yapayZeka (5)\\model\\model1.model");
-            data1 = new Instances(new java.io.FileReader(".\\Users\\kilic\\Downloads\\yapayZeka (5)\\arff\\norm_spam1.arff"));
+            model1 = (NaiveBayes) SerializationHelper.read("https://github.com/bugraklcc/yapayZeka-5-/blob/main/yapayZeka/model/model1");
+            data1 = new Instances(new java.io.FileReader("https://github.com/bugraklcc/yapayZeka-5-/blob/main/yapayZeka/arff/norm_spam1.arff"));
             data1.setClassIndex(data1.numAttributes() - 1);
 
             // Model2 yükleme
-            model2 = (NaiveBayes) SerializationHelper.read(".\\Downloads\\yapayZeka (5)\\model\\norm_spam_model.model");
-            data2 = new Instances(new java.io.FileReader(".\\Downloads\\yapayZeka (5)\\arff\\norm_spam.arff"));
+            model2 = (NaiveBayes) SerializationHelper.read("https://github.com/bugraklcc/yapayZeka-5-/blob/main/yapayZeka/model/norm_spam_model.model");
+            data2 = new Instances(new java.io.FileReader("https://github.com/bugraklcc/yapayZeka-5-/blob/main/yapayZeka/arff/norm_spam.arff"));
             data2.setClassIndex(data2.numAttributes() - 1);
         } catch (Exception e) {
             e.printStackTrace();
@@ -40,7 +39,7 @@ public class EmailController {
      */
   
     @PostMapping("/")
-    public String classifyEmail(@RequestBody String input) {
+    public String classifyEmail(@RequestParam String input) {
         // Gelen maili normal/spam olarak sınıflandırma
         double[] instanceValues = new double[data1.numAttributes()];
         String[] inputValues = input.split(",");
@@ -49,7 +48,11 @@ public class EmailController {
         }
         double result;
         try {
-            result = model1.classifyInstance(new DenseInstance(1.0, instanceValues));
+            DenseInstance instance = new DenseInstance(1.0, instanceValues);
+            for (int i = 0; i < instanceValues.length; i++) {
+                instance.setValue(i, instanceValues[i]);
+            }
+            result = model1.classifyInstance(instance);
         } catch (Exception e) {
             e.printStackTrace();
             return "error";
